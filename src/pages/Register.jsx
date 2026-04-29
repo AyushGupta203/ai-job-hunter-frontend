@@ -21,7 +21,9 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    console.log("🚀 [Register] Form Submit Triggered!");
+    console.log("📦 [Register] Payload:", formData);
     setLoading(true);
     setError("");
     try {
@@ -69,7 +71,7 @@ const Register = () => {
             </ToggleButtonGroup>
           </Box>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <TextField fullWidth label="Full Name" name="name"
               value={formData.name} onChange={handleChange}
               required sx={{ mb: 2 }} />
@@ -79,11 +81,18 @@ const Register = () => {
             <TextField fullWidth label="Password" name="password"
               type="password" value={formData.password}
               onChange={handleChange} required sx={{ mb: 3 }} />
-            <Button type="submit" fullWidth variant="contained"
-              size="large" disabled={loading} sx={{ py: 1.5, fontSize: 15 }}>
+            <Button 
+              type="submit" 
+              fullWidth 
+              variant="contained"
+              size="large" 
+              disabled={loading} 
+              onClick={() => console.log("🔘 [Register] Button Clicked!")}
+              sx={{ py: 1.5, fontSize: 15 }}
+            >
               {loading ? <CircularProgress size={22} color="inherit" /> : "Create Account"}
             </Button>
-          </Box>
+          </form>
 
           <Typography align="center" mt={2.5} fontSize={14}>
             Already have an account?{" "}

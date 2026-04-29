@@ -25,7 +25,9 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    console.log("🚀 [Login] Form Submit Triggered!");
+    console.log("📧 [Login] Email:", formData.email);
     setLoading(true);
     setError("");
     try {
@@ -81,7 +83,7 @@ const Login = () => {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} autoComplete="on">
+          <form onSubmit={handleSubmit} autoComplete="on">
             <TextField
               fullWidth
               label="Email"
@@ -112,6 +114,7 @@ const Login = () => {
               variant="contained"
               size="large"
               disabled={loading}
+              onClick={() => console.log("🔘 [Login] Button Clicked!")}
               sx={{ py: 1.5, fontSize: 15 }}
             >
               {loading ? (
@@ -120,7 +123,7 @@ const Login = () => {
                 "Sign In"
               )}
             </Button>
-          </Box>
+          </form>
 
           <Typography sx={{ textAlign: "center", mt: 2.5, fontSize: 14 }}>
             Don't have an account?{" "}
