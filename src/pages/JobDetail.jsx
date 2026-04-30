@@ -171,7 +171,7 @@ const JobDetail = () => {
                   >
                     {applying ? "Applying..." : "Apply Now"}
                   </Button>
-                  
+
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -185,7 +185,7 @@ const JobDetail = () => {
                   >
                     {evaluating ? "Analyzing..." : "Analyze Match"}
                   </Button>
-                  
+
                   <Button
                     variant="text"
                     size="large"
@@ -207,6 +207,12 @@ const JobDetail = () => {
                     <Typography variant="body2" mt={0.5}>
                       {analysis.summary}
                     </Typography>
+                    {/* Show reason if provided */}
+                    {analysis.reason && (
+                      <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                        Reason: {analysis.reason}
+                      </Typography>
+                    )}
                   </Alert>
                 )}
               </Box>

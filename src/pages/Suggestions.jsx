@@ -104,7 +104,7 @@ const Suggestions = () => {
             Your AI-Matched Jobs
           </Typography>
           <Typography color="text.secondary" sx={{ fontSize: 16, maxWidth: 500, mx: "auto", mb: 3 }}>
-            Jobs ranked by how well they match your resume. Higher scores mean stronger alignment with your skills.
+            Scores are calculated using the same unified AI scoring rubric as the "Analyze Match" view. The number shown is the match percentage and the brief reason explains why.
           </Typography>
 
           {/* Score distribution */}
@@ -203,7 +203,7 @@ const Suggestions = () => {
                   </Box>
                   {/* Match reason */}
                   {item.reason && (
-                    <Typography color="text.secondary" fontSize={13} sx={{ lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", fontSize: "0.85rem" }}>
                       {item.reason}
                     </Typography>
                   )}
