@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import {
   Box, Container, Typography, TextField, Card, CardContent,
   Button, Chip, Grid, InputAdornment, Skeleton, Avatar, useTheme,
-  LinearProgress,
+  LinearProgress, CircularProgress, Tooltip,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
@@ -22,6 +22,10 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PauseIcon from "@mui/icons-material/Pause";
+import LockIcon from "@mui/icons-material/Lock";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 /* ── helpers ── */
 const timeAgo = (dateStr) => {
@@ -124,15 +128,51 @@ const Home = () => {
     );
   };
 
+  const [statusLoading, setStatusLoading] = useState({});
+  const [deleteConfirm, setDeleteConfirm] = useState({});
+  const [deleteLoading, setDeleteLoading] = useState({});
+
   const updateJobStatus = async (jobId, status) => {
+    setStatusLoading((p) => ({ ...p, [jobId]: status }));
     try {
       await API.put("/jobs/status", { jobId, status });
       setJobs((prev) => prev.map((j) => (j._id === jobId ? { ...j, status } : j)));
       setFiltered((prev) => prev.map((j) => (j._id === jobId ? { ...j, status } : j)));
     } catch (err) {
       console.error("Failed to update job status", err);
+    } finally {
+      setStatusLoading((p) => { const n = { ...p }; delete n[jobId]; return n; });
     }
   };
+
+  const deleteJob = async (jobId) => {
+    setDeleteLoading((p) => ({ ...p, [jobId]: true }));
+    try {
+      await API.delete(`/jobs/${jobId}`);
+      setJobs((prev) => prev.filter((j) => j._id !== jobId));
+      setFiltered((prev) => prev.filter((j) => j._id !== jobId));
+    } catch (err) {
+      console.error("Failed to delete job", err);
+    } finally {
+      setDeleteLoading((p) => { const n = { ...p }; delete n[jobId]; return n; });
+      setDeleteConfirm((p) => { const n = { ...p }; delete n[jobId]; return n; });
+    }
+  };
+
+  /* ── Top Picks for seekers ── */
+  const [topPicks, setTopPicks] = useState([]);
+  const [topPicksLoading, setTopPicksLoading] = useState(false);
+  const [topPicksError, setTopPicksError] = useState(false);
+
+  useEffect(() => {
+    if (user?.role === "seeker") {
+      setTopPicksLoading(true);
+      API.get("/ai/recommend")
+        .then((res) => setTopPicks((res.data || []).slice(0, 3)))
+        .catch(() => setTopPicksError(true))
+        .finally(() => setTopPicksLoading(false));
+    }
+  }, [user]);
 
   /* ── RECRUITER DASHBOARD ── */
   if (user?.role === "recruiter") {
@@ -199,12 +239,234 @@ const Home = () => {
                         </Box>
                       </Box>
                     </Grid>
-                    <Grid item xs={12} md={4} sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: { xs: "stretch", md: "flex-end" } }}>
-                      <Button variant="contained" startIcon={<PeopleIcon />} onClick={() => navigate(`/applicants/${job._id}`)} fullWidth sx={{ borderRadius: 2, py: 1, fontWeight: 600 }}>View Applicants</Button>
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        {job.status !== "closed" && <Button variant="outlined" color="error" size="small" onClick={() => updateJobStatus(job._id, "closed")} sx={{ borderRadius: 2, flex: 1 }}>Close</Button>}
-                        {job.status !== "closed" && job.status !== "paused" && <Button variant="outlined" color="warning" size="small" onClick={() => updateJobStatus(job._id, "paused")} sx={{ borderRadius: 2, flex: 1 }}>Pause</Button>}
-                        {(job.status === "paused" || job.status === "closed") && <Button variant="outlined" color="success" size="small" onClick={() => updateJobStatus(job._id, "open")} sx={{ borderRadius: 2, flex: 1 }}>Reopen</Button>}
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+
+                        {/* ── PRIMARY: View Applicants ── */}
+                        <Tooltip title="View and manage all candidates" arrow placement="top">
+                          <Button
+                            variant="contained"
+                            startIcon={<PeopleIcon />}
+                            onClick={() => navigate(`/applicants/${job._id}`)}
+                            fullWidth
+                            sx={{
+                              borderRadius: 2.5, py: 1.3, fontWeight: 700, fontSize: 14,
+                              background: "linear-gradient(135deg, #0071e3 0%, #42a5f5 100%)",
+                              boxShadow: "0 4px 14px rgba(0,113,227,0.3)",
+                              transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                              "&:hover": { transform: "translateY(-2px) scale(1.02)", boxShadow: "0 8px 24px rgba(0,113,227,0.45)" },
+                              "&:active": { transform: "scale(0.97)" },
+                            }}
+                          >
+                            View Applicants
+                          </Button>
+                        </Tooltip>
+
+                        {/* ── SECONDARY: Status controls ── */}
+                        <Box sx={{ display: "flex", gap: 1.5, mt: 1.5 }}>
+                          {/* OPEN → Pause + Close */}
+                          {job.status === "open" && (
+                            <>
+                              <Tooltip title="Temporarily stop receiving applications" arrow>
+                                <Button
+                                  variant="outlined" size="small" fullWidth
+                                  startIcon={statusLoading[job._id] === "paused" ? <CircularProgress size={14} color="inherit" /> : <PauseIcon sx={{ fontSize: 16 }} />}
+                                  disabled={!!statusLoading[job._id]}
+                                  onClick={() => updateJobStatus(job._id, "paused")}
+                                  sx={{
+                                    borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.85,
+                                    borderWidth: 1.5,
+                                    borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)",
+                                    color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
+                                    transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                    "&:hover": {
+                                      bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                                      borderColor: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)",
+                                      color: isDark ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.8)",
+                                      transform: "translateY(-1px) scale(1.02)",
+                                      borderWidth: 1.5,
+                                    },
+                                    "&:active": { transform: "scale(0.97)" },
+                                  }}
+                                >
+                                  Pause
+                                </Button>
+                              </Tooltip>
+                              <Tooltip title="Stop accepting applications" arrow>
+                                <Button
+                                  variant="outlined" size="small" fullWidth
+                                  startIcon={statusLoading[job._id] === "closed" ? <CircularProgress size={14} color="inherit" /> : <LockIcon sx={{ fontSize: 16 }} />}
+                                  disabled={!!statusLoading[job._id]}
+                                  onClick={() => updateJobStatus(job._id, "closed")}
+                                  sx={{
+                                    borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.85,
+                                    borderWidth: 1.5,
+                                    borderColor: isDark ? "rgba(239,68,68,0.25)" : "rgba(239,68,68,0.3)",
+                                    color: isDark ? "rgba(248,113,113,0.7)" : "rgba(185,28,28,0.6)",
+                                    transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                    "&:hover": {
+                                      bgcolor: isDark ? "rgba(239,68,68,0.08)" : "rgba(239,68,68,0.05)",
+                                      borderColor: isDark ? "rgba(239,68,68,0.5)" : "rgba(239,68,68,0.5)",
+                                      color: isDark ? "#f87171" : "#b91c1c",
+                                      transform: "translateY(-1px) scale(1.02)",
+                                      borderWidth: 1.5,
+                                    },
+                                    "&:active": { transform: "scale(0.97)" },
+                                  }}
+                                >
+                                  Close
+                                </Button>
+                              </Tooltip>
+                            </>
+                          )}
+
+                          {/* PAUSED → Resume + Close */}
+                          {job.status === "paused" && (
+                            <>
+                              <Tooltip title="Resume accepting applications" arrow>
+                                <Button
+                                  variant="outlined" color="success" size="small" fullWidth
+                                  startIcon={statusLoading[job._id] === "open" ? <CircularProgress size={14} color="inherit" /> : <PlayArrowIcon sx={{ fontSize: 16 }} />}
+                                  disabled={!!statusLoading[job._id]}
+                                  onClick={() => updateJobStatus(job._id, "open")}
+                                  sx={{
+                                    borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.85,
+                                    borderWidth: 1.5, borderColor: isDark ? "rgba(34,197,94,0.5)" : "rgba(34,197,94,0.6)",
+                                    color: isDark ? "#4ade80" : "#15803d",
+                                    transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                    "&:hover": {
+                                      bgcolor: isDark ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.1)",
+                                      borderColor: isDark ? "rgba(34,197,94,0.7)" : "rgba(34,197,94,0.8)",
+                                      transform: "translateY(-1px) scale(1.02)",
+                                      borderWidth: 1.5,
+                                    },
+                                    "&:active": { transform: "scale(0.97)" },
+                                  }}
+                                >
+                                  Resume
+                                </Button>
+                              </Tooltip>
+                              <Tooltip title="Stop accepting applications" arrow>
+                                <Button
+                                  variant="outlined" size="small" fullWidth
+                                  startIcon={statusLoading[job._id] === "closed" ? <CircularProgress size={14} color="inherit" /> : <LockIcon sx={{ fontSize: 16 }} />}
+                                  disabled={!!statusLoading[job._id]}
+                                  onClick={() => updateJobStatus(job._id, "closed")}
+                                  sx={{
+                                    borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.85,
+                                    borderWidth: 1.5,
+                                    borderColor: isDark ? "rgba(239,68,68,0.25)" : "rgba(239,68,68,0.3)",
+                                    color: isDark ? "rgba(248,113,113,0.7)" : "rgba(185,28,28,0.6)",
+                                    transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                    "&:hover": {
+                                      bgcolor: isDark ? "rgba(239,68,68,0.08)" : "rgba(239,68,68,0.05)",
+                                      borderColor: isDark ? "rgba(239,68,68,0.5)" : "rgba(239,68,68,0.5)",
+                                      color: isDark ? "#f87171" : "#b91c1c",
+                                      transform: "translateY(-1px) scale(1.02)",
+                                      borderWidth: 1.5,
+                                    },
+                                    "&:active": { transform: "scale(0.97)" },
+                                  }}
+                                >
+                                  Close
+                                </Button>
+                              </Tooltip>
+                            </>
+                          )}
+
+                          {/* CLOSED → Reopen only */}
+                          {job.status === "closed" && (
+                            <Tooltip title="Reopen this job and start accepting applications" arrow>
+                              <Button
+                                variant="outlined" color="success" size="small" fullWidth
+                                startIcon={statusLoading[job._id] === "open" ? <CircularProgress size={14} color="inherit" /> : <PlayArrowIcon sx={{ fontSize: 16 }} />}
+                                disabled={!!statusLoading[job._id]}
+                                onClick={() => updateJobStatus(job._id, "open")}
+                                sx={{
+                                  borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.85,
+                                  borderWidth: 1.5, borderColor: isDark ? "rgba(34,197,94,0.5)" : "rgba(34,197,94,0.6)",
+                                  color: isDark ? "#4ade80" : "#15803d",
+                                  transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                  "&:hover": {
+                                    bgcolor: isDark ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.1)",
+                                    borderColor: isDark ? "rgba(34,197,94,0.7)" : "rgba(34,197,94,0.8)",
+                                    transform: "translateY(-1px) scale(1.02)",
+                                    borderWidth: 1.5,
+                                  },
+                                  "&:active": { transform: "scale(0.97)" },
+                                }}
+                              >
+                                Reopen
+                              </Button>
+                            </Tooltip>
+                          )}
+                        </Box>
+
+                        {/* ── DANGER: Delete ── */}
+                        <Box sx={{
+                          mt: 2, pt: 1.5,
+                          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)"}`,
+                        }}>
+                          {!deleteConfirm[job._id] ? (
+                            <Tooltip title="Permanently delete this job and all applications" arrow>
+                              <Button
+                                variant="text" color="error" size="small" fullWidth
+                                startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
+                                onClick={() => setDeleteConfirm((p) => ({ ...p, [job._id]: true }))}
+                                sx={{
+                                  borderRadius: 2, fontWeight: 700, fontSize: 12.5, py: 0.7,
+                                  color: isDark ? "rgba(248,113,113,0.75)" : "rgba(185,28,28,0.7)",
+                                  transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                  "&:hover": {
+                                    color: isDark ? "#f87171" : "#b91c1c",
+                                    bgcolor: isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)",
+                                    transform: "scale(1.02)",
+                                  },
+                                  "&:active": { transform: "scale(0.97)" },
+                                }}
+                              >
+                                Delete Job
+                              </Button>
+                            </Tooltip>
+                          ) : (
+                            <Box sx={{
+                              display: "flex", gap: 1, alignItems: "center",
+                              bgcolor: isDark ? "rgba(239,68,68,0.08)" : "rgba(239,68,68,0.04)",
+                              borderRadius: 2, px: 1.5, py: 0.75,
+                            }}>
+                              <Typography variant="caption" color="error.main" fontWeight={700} sx={{ flex: 1, fontSize: 11.5 }}>
+                                Delete this job?
+                              </Typography>
+                              <Button
+                                size="small"
+                                onClick={() => setDeleteConfirm((p) => { const n = { ...p }; delete n[job._id]; return n; })}
+                                sx={{
+                                  borderRadius: 2, fontSize: 11.5, fontWeight: 600, minWidth: 0, px: 2, py: 0.5,
+                                  transition: "all 0.2s",
+                                  "&:active": { transform: "scale(0.97)" },
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                variant="contained" color="error" size="small"
+                                disabled={deleteLoading[job._id]}
+                                startIcon={deleteLoading[job._id] ? <CircularProgress size={12} color="inherit" /> : <DeleteIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => deleteJob(job._id)}
+                                sx={{
+                                  borderRadius: 2, fontSize: 11.5, fontWeight: 700, minWidth: 0, px: 2, py: 0.5,
+                                  boxShadow: "0 2px 8px rgba(239,68,68,0.3)",
+                                  transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
+                                  "&:hover": { boxShadow: "0 4px 16px rgba(239,68,68,0.4)", transform: "scale(1.02)" },
+                                  "&:active": { transform: "scale(0.96)" },
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </Box>
+                          )}
+                        </Box>
+
                       </Box>
                     </Grid>
                   </Grid>
@@ -370,6 +632,68 @@ const Home = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* ─── TOP PICKS FOR YOU ─── */}
+        {!topPicksError && (topPicksLoading || topPicks.length > 0) && (
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1.5 }}>
+              <Box sx={{ width: 4, height: 24, bgcolor: "#f59e0b", borderRadius: 4 }} />
+              <AutoAwesomeIcon sx={{ color: "#f59e0b", fontSize: 22 }} />
+              <Typography variant="h5" fontWeight={800} sx={{ flexGrow: 1 }}>Top Picks for You</Typography>
+              <Button size="small" onClick={() => navigate("/ai-hunter")} endIcon={<ArrowForwardIcon />} sx={{ fontWeight: 600 }}>See All</Button>
+            </Box>
+
+            {topPicksLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                <CircularProgress size={28} />
+              </Box>
+            ) : (
+              <Grid container spacing={2}>
+                {topPicks.map((item, i) => (
+                  <Grid item xs={12} sm={4} key={i}>
+                    <Card
+                      onClick={() => navigate(`/jobs/${item.jobId}`)}
+                      sx={{
+                        cursor: "pointer", height: "100%",
+                        transition: "all 0.25s",
+                        background: isDark
+                          ? "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(59,130,246,0.08) 100%)"
+                          : "linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(59,130,246,0.04) 100%)",
+                        border: isDark ? "1px solid rgba(245,158,11,0.2)" : "1px solid rgba(245,158,11,0.15)",
+                        "&:hover": { transform: "translateY(-3px)", boxShadow: isDark ? "0 12px 32px rgba(0,0,0,0.4)" : "0 12px 32px rgba(245,158,11,0.15)" },
+                      }}
+                    >
+                      <CardContent sx={{ p: 2.5 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+                          <Box sx={{
+                            position: "relative", width: 48, height: 48, borderRadius: "50%",
+                            background: item.matchScore >= 70 ? "linear-gradient(135deg, #22c55e, #16a34a)" : item.matchScore >= 50 ? "linear-gradient(135deg, #f59e0b, #d97706)" : "linear-gradient(135deg, #ef4444, #dc2626)",
+                            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                          }}>
+                            <Typography fontWeight={800} fontSize={16} color="#fff">{item.matchScore}</Typography>
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography fontWeight={700} fontSize={15} noWrap>{item.title}</Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                              <LocationOnIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+                              <Typography variant="caption" color="text.secondary">{item.location}</Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                        {item.reason && (
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12, fontStyle: "italic", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                            {item.reason}
+                          </Typography>
+                        )}
+                        <LinearProgress variant="determinate" value={item.matchScore} color={item.matchScore >= 70 ? "success" : item.matchScore >= 50 ? "warning" : "error"} sx={{ mt: 1.5, height: 3, borderRadius: 2 }} />
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
 
         {/* ─── JOB LISTINGS ─── */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1.5 }}>
