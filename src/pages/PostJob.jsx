@@ -5,10 +5,12 @@ import Navbar from "../components/Navbar";
 import {
   Box, Container, Typography, TextField,
   Button, Card, CardContent, Alert, CircularProgress,
-  Grid, Avatar, useTheme
+  Grid, Avatar, useTheme, Collapse
 } from "@mui/material";
 import WorkIcon from "@mui/icons-material/Work";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const PostJob = () => {
   const navigate = useNavigate();
@@ -20,9 +22,37 @@ const PostJob = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [extracting, setExtracting] = useState(false);
+   const [showAI, setShowAI] = useState(false);
+    const [rawText, setRawText] = useState("");
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleExtract = async() =>{
+    if(!rawText.trim()) return;
+      setExtracting(true);
+      try{
+        const res = await API.post("/ai/extract-job", {rawText});
+        setFormData({
+          title :res.data.title,
+          company : res.data.company,
+          location : res.data.location,
+          salary: res.data.salary,
+          description: res.data.description,
+
+        });
+        setExtracting(false);
+        setShowAI(false);
+        setMessage({ text: "Job details extracted successfully!", type: "success" });
+      }
+      catch(err){
+        setMessage({ text: "Failed to extract job details.", type: "error" });
+      }
+      finally{
+        setExtracting(false);
+      }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +114,73 @@ const PostJob = () => {
           </Box>
         </Box>
         
+        {/* AI SECTION */}
+        <Card elevation={0} sx={{
+          mb: 3,
+          border: "1px solid",
+          borderColor: showAI ? "primary.main" : "#d2d2d7",
+          borderRadius: 3,
+          background: showAI
+            ? "linear-gradient(135deg, rgba(0,113,227,0.04), rgba(0,113,227,0.02))"
+            : "transparent",
+          transition: "all 0.2s"
+        }}>
+            <CardContent sx={{ p: 2.5 }}>
 
+            {/* Toggle Button */}
+            <Box
+              onClick={() => setShowAI(!showAI)}
+              sx={{
+                display: "flex", justifyContent: "space-between",
+                alignItems: "center", cursor: "pointer"
+              }}
+            >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <AutoAwesomeIcon color="primary" sx={{ fontSize: 20 }} />
+                <Box>
+                  <Typography fontWeight={600} fontSize={15}>
+                    Auto-fill with AI
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Paste any text — AI will extract job details
+                  </Typography>
+                </Box>
+              </Box>
+              <KeyboardArrowDownIcon
+                sx={{
+                  color: "text.secondary",
+                  transform: showAI ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s"
+                }}
+              />
+            </Box>
+ {/* AI Input — collapsible */}
+            <Collapse in={showAI}>
+              <Box sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth multiline rows={5}
+                  placeholder={`Paste anything here — job email, WhatsApp message, LinkedIn post...\n\nExample:\n"We need a React developer at TCS Noida. 5-8 LPA. Must know React, Node.js, 2 years exp."`}
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="contained" fullWidth
+                  startIcon={
+                    extracting
+                      ? <CircularProgress size={16} color="inherit" />
+                      : <AutoAwesomeIcon />
+                  }
+                  onClick={handleExtract}
+                  disabled={extracting || !rawText.trim()}
+                  sx={{ borderRadius: 980 }}
+                >
+                Extract Job
+                </Button>
+              </Box>
+            </Collapse>
+            </CardContent>
+        </Card>
         <Card 
           sx={{ 
             borderRadius: 4, 
