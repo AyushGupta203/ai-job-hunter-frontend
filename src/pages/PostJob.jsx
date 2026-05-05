@@ -18,7 +18,7 @@ const PostJob = () => {
   const isDark = theme.palette.mode === "dark";
 
   const [formData, setFormData] = useState({
-    title: "", company: "", location: "", description: "", salary: ""
+    title: "", company: "", location: "", description: "", salary: "", experienceLevel: "", skills: ""
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -39,6 +39,8 @@ const PostJob = () => {
           company : res.data.company,
           location : res.data.location,
           salary: res.data.salary,
+          experienceLevel: res.data.experienceLevel || "",
+          skills: res.data.skills || "",
           description: res.data.description,
 
         });
@@ -244,7 +246,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={4}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Salary (Optional)
                   </Typography>
@@ -254,6 +256,34 @@ const PostJob = () => {
                     value={formData.salary}
                     onChange={handleChange}
                     placeholder="e.g. $120k - $150k"
+                    sx={inputStyles}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
+                    Experience Required
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    name="experienceLevel"
+                    value={formData.experienceLevel}
+                    onChange={handleChange}
+                    placeholder="e.g. 3-5 years, Senior"
+                    sx={inputStyles}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
+                    Key Skills
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    name="skills"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    placeholder="e.g. React, Node.js, AWS"
                     sx={inputStyles}
                   />
                 </Grid>

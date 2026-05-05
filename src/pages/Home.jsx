@@ -234,6 +234,8 @@ const Home = () => {
                             <Chip icon={<BusinessIcon sx={{ fontSize: 14 }} />} label={job.company} size="small" sx={{ fontWeight: 500 }} />
                             <Chip icon={<LocationOnIcon sx={{ fontSize: 14 }} />} label={job.location} size="small" sx={{ fontWeight: 500 }} />
                             {job.salary && job.salary !== "Not disclosed" && <Chip label={`💰 ${job.salary}`} size="small" color="success" variant="outlined" />}
+                            {job.experienceLevel && job.experienceLevel !== "Not specified" && <Chip icon={<WorkIcon sx={{ fontSize: 14 }} />} label={job.experienceLevel} size="small" color="secondary" variant="outlined" sx={{ fontWeight: 500 }} />}
+                            {job.skills && job.skills.trim() !== "" && <Chip icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />} label={job.skills.split(",")[0].trim() + (job.skills.split(",").length > 1 ? " +" : "")} size="small" sx={{ fontWeight: 500, bgcolor: "rgba(0,113,227,0.08)", color: "primary.main" }} />}
                           </Box>
                           <Typography color="text.secondary" fontSize={14} sx={{ lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{job.description}</Typography>
                         </Box>
@@ -517,6 +519,12 @@ const Home = () => {
               <Chip label={`💰 ${job.salary}`} size="small" sx={{ fontSize: 12, height: 26, fontWeight: 600, bgcolor: isDark ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.08)", color: isDark ? "#4ade80" : "#16a34a" }} />
             ) : (
               <Chip label="Salary: Undisclosed" size="small" sx={{ fontSize: 11, height: 26, opacity: 0.6 }} />
+            )}
+            {job.experienceLevel && job.experienceLevel !== "Not specified" && (
+              <Chip icon={<WorkIcon sx={{ fontSize: 13 }} />} label={job.experienceLevel} size="small" sx={{ fontSize: 12, height: 26 }} />
+            )}
+            {job.skills && job.skills.trim() !== "" && (
+              <Chip label={job.skills.split(",").slice(0, 2).join(", ")} size="small" sx={{ fontSize: 12, height: 26, bgcolor: isDark ? "rgba(96,165,250,0.15)" : "rgba(0,113,227,0.08)", color: "primary.main", fontWeight: 500 }} />
             )}
           </Box>
 

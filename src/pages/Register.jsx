@@ -15,6 +15,7 @@ const Register = () => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "seeker" });
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
@@ -28,8 +29,7 @@ const Register = () => {
     setError("");
     try {
       const res = await API.post("/auth/register", formData);
-      login(res.data.token, res.data.user);
-      navigate("/home");
+      setSuccessMsg(`Signup successful! A verification link has been sent to ${formData.email}. Please check your inbox (and spam folder).`);
     } catch (err) {
       setError(err.response?.data?.msg || "Registration failed");
     } finally {
@@ -53,6 +53,7 @@ const Register = () => {
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
 
           {/* Role Toggle */}
           <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
@@ -86,7 +87,7 @@ const Register = () => {
               fullWidth 
               variant="contained"
               size="large" 
-              disabled={loading} 
+              disabled={loading || !!successMsg} 
               onClick={() => console.log("🔘 [Register] Button Clicked!")}
               sx={{ py: 1.5, fontSize: 15 }}
             >

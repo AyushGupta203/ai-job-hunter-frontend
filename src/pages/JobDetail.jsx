@@ -12,6 +12,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BusinessIcon from "@mui/icons-material/Business";
 import SendIcon from "@mui/icons-material/Send";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import WorkIcon from "@mui/icons-material/Work";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -124,7 +125,28 @@ const JobDetail = () => {
                   color="success"
                 />
               )}
+              {job.experienceLevel && job.experienceLevel !== "Not specified" && (
+                <Chip
+                  icon={<WorkIcon sx={{ fontSize: 16 }} />}
+                  label={`Exp: ${job.experienceLevel}`}
+                  variant="outlined"
+                  color="secondary"
+                />
+              )}
             </Box>
+
+            {job.skills && job.skills.trim() !== "" && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" fontWeight={600} mb={1}>
+                  Required Skills:
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  {job.skills.split(",").map((skill, idx) => (
+                    <Chip key={idx} label={skill.trim()} size="small" sx={{ fontWeight: 500, bgcolor: "rgba(0,113,227,0.08)", color: "primary.main" }} />
+                  ))}
+                </Box>
+              </Box>
+            )}
 
             <Divider sx={{ mb: 3 }} />
 
