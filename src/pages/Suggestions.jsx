@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import Navbar from "../components/Navbar";
+
 import {
   Box, Container, Typography, Card, CardContent,
   Chip, LinearProgress, CircularProgress, Alert, Button,
   TextField, InputAdornment, MenuItem, Select, FormControl,
   Avatar, useTheme,
 } from "@mui/material";
+import { useMemo, useCallback } from "react";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import BusinessIcon from "@mui/icons-material/Business";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -21,48 +25,63 @@ const Suggestions = () => {
   const isDark = theme.palette.mode === "dark";
 
   const [suggestions, setSuggestions] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [scoreFilter, setScoreFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
   const [sortBy, setSortBy] = useState("score");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await API.get("/ai/recommend");
-        setSuggestions(res.data);
-        setFiltered(res.data);
-      } catch (err) {
+  const fetchSuggestions = useCallback(async (isRefresh = false) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await API.get("/ai/recommend", {
+        params: { 
+          limit: 10,
+          ...(isRefresh === true ? { refresh: true } : {}) 
+        }
+      });
+
+      const filteredJobs = res.data.filter(job => !job.applied);
+      setSuggestions(filteredJobs);
+
+    } catch (err) {
+      if (!err.response) {
+        setError("Network error. Check your internet.");
+      } else {
         setError(err.response?.data?.msg || "Upload resume first");
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchData();
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  /* Filtering + sorting logic */
   useEffect(() => {
-    let result = [...suggestions];
+    fetchSuggestions(false);
+  }, [fetchSuggestions]);
+  /* Filtering + sorting logic */
+ 
+const processedData = useMemo(() => {
+  let result = [...suggestions];
 
-    // Score filter
-    if (scoreFilter === "70") result = result.filter((s) => s.matchScore >= 70);
-    else if (scoreFilter === "50") result = result.filter((s) => s.matchScore >= 50);
+  if (scoreFilter === "70") result = result.filter(s => s.matchScore >= 70);
+  else if (scoreFilter === "50") result = result.filter(s => s.matchScore >= 50);
 
-    // Text search
-    if (searchText) {
-      const q = searchText.toLowerCase();
-      result = result.filter((s) => s.title?.toLowerCase().includes(q) || s.location?.toLowerCase().includes(q));
-    }
+  if (searchText) {
+    const q = searchText.toLowerCase();
+    result = result.filter(
+      s => s.title?.toLowerCase().includes(q) ||
+           s.location?.toLowerCase().includes(q)
+    );
+  }
 
-    // Sort
-    if (sortBy === "score") result.sort((a, b) => b.matchScore - a.matchScore);
-    else if (sortBy === "title") result.sort((a, b) => a.title.localeCompare(b.title));
+  if (sortBy === "score") result.sort((a, b) => b.matchScore - a.matchScore);
+  else result.sort((a, b) => a.title.localeCompare(b.title));
 
-    setFiltered(result);
-  }, [scoreFilter, searchText, sortBy, suggestions]);
+  return result.slice(0, 8); // limit safety
+}, [suggestions, scoreFilter, searchText, sortBy]);
+    
 
   const scoreColor = (s) => (s >= 70 ? "success" : s >= 50 ? "warning" : "error");
   const scoreBg = (s) =>
@@ -102,9 +121,45 @@ const Suggestions = () => {
           </Box>
           <Typography variant="h3" fontWeight={800} sx={{ mb: 1 }}>
             Your AI-Matched Jobs
+            <Box sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={() => fetchSuggestions(true)}
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
+                sx={{
+                  background: isDark 
+                    ? "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)" 
+                    : "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
+                  color: "white",
+                  fontWeight: 700,
+                  px: 4,
+                  py: 1,
+                  borderRadius: 4,
+                  textTransform: "none",
+                  fontSize: "1.05rem",
+                  boxShadow: isDark 
+                    ? "0 8px 20px -6px rgba(139, 92, 246, 0.5)" 
+                    : "0 8px 20px -6px rgba(124, 58, 237, 0.5)",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&:hover": {
+                    transform: "translateY(-3px) scale(1.02)",
+                    boxShadow: isDark 
+                      ? "0 12px 28px -8px rgba(139, 92, 246, 0.7)" 
+                      : "0 12px 28px -8px rgba(124, 58, 237, 0.7)",
+                  },
+                  "&:active": {
+                    transform: "translateY(1px)",
+                  }
+                }}
+              >
+                {loading ? "Hunting Matches..." : "AI Re-Hunt"}
+              </Button>
+            </Box>
           </Typography>
+          
           <Typography color="text.secondary" sx={{ fontSize: 16, maxWidth: 500, mx: "auto", mb: 3 }}>
-            Scores are calculated using the same unified AI scoring rubric as the "Analyze Match" view. The number shown is the match percentage and the brief reason explains why.
+          
           </Typography>
 
           {/* Score distribution */}
@@ -162,14 +217,14 @@ const Suggestions = () => {
         {/* Filtered count */}
         {suggestions.length > 0 && (
           <Typography color="text.secondary" fontSize={13} fontWeight={500} mb={2}>
-            Showing {filtered.length} of {suggestions.length} matches
+            Showing {processedData.length} of {suggestions.length} matches
           </Typography>
         )}
 
         {/* ─── CARDS ─── */}
-        {filtered.map((item, i) => (
+        {processedData.map((item, i) => (
           <Card
-            key={i}
+            key={item.jobId}
             onClick={() => navigate(`/jobs/${item.jobId}`)}
             sx={{
               mb: 2, cursor: "pointer",
@@ -197,10 +252,44 @@ const Suggestions = () => {
                   <Typography variant="h6" fontWeight={700} sx={{ mb: 0.25, display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {item.title}
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-                    <Chip icon={<LocationOnIcon sx={{ fontSize: 13 }} />} label={item.location} size="small" sx={{ fontSize: 12, height: 24 }} />
-                    {item.matchScore >= 70 && <Chip label="Strong Match" size="small" color="success" sx={{ fontSize: 11, height: 22, fontWeight: 700 }} />}
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }}>
+                    {item.company && (
+                      <Chip
+                        icon={<BusinessIcon sx={{ fontSize: 13 }} />}
+                        label={item.company}
+                        size="small"
+                        variant="outlined"
+                      />
+                    )}
+                    <Chip
+                      icon={<LocationOnIcon sx={{ fontSize: 13 }} />}
+                      label={item.location}
+                      size="small"
+                      sx={{ fontSize: 12, height: 24 }}
+                    />
+                    {item.salary && item.salary !== "Not Disclosed" && (
+                      <Chip
+                        label={`💰 ${item.salary}`}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        sx={{ fontWeight: 600, bgcolor: isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.05)' }}
+                      />
+                    )}
+                    {item.matchScore >= 70 && <Chip label="Strong Match" size="small" color="success" sx={{ fontSize: 11, height: 24, fontWeight: 700 }} />}
                   </Box>
+
+                  {/* Skills Demand & Experience Match */}
+                  {((Array.isArray(item.missingSkills) ? item.missingSkills : []).length > 0 || (Array.isArray(item.strengths) ? item.strengths : []).length > 0) && (
+                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }}>
+                      {(Array.isArray(item.strengths) ? item.strengths : []).slice(0, 2).map((s, idx) => (
+                        <Chip key={`strength-${idx}`} label={`✓ ${s}`} size="small" sx={{ fontSize: 11, bgcolor: isDark ? 'rgba(56, 189, 248, 0.1)' : 'rgba(2, 132, 199, 0.05)', color: isDark ? '#38bdf8' : '#0284c7', height: 22, fontWeight: 500 }} />
+                      ))}
+                      {(Array.isArray(item.missingSkills) ? item.missingSkills : []).slice(0, 2).map((ms, idx) => (
+                        <Chip key={`demand-${idx}`} label={`Demand: ${ms}`} size="small" sx={{ fontSize: 11, bgcolor: isDark ? 'rgba(248, 113, 113, 0.1)' : 'rgba(220, 38, 38, 0.05)', color: isDark ? '#f87171' : '#dc2626', height: 22, fontWeight: 500 }} />
+                      ))}
+                    </Box>
+                  )}
                   {/* Match reason */}
                   {item.reason && (
                     <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", fontSize: "0.85rem" }}>
