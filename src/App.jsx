@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import Landing from "./pages/Landing";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import JobDetail from "./pages/JobDetail";
