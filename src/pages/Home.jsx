@@ -44,6 +44,33 @@ const isRecent = (dateStr) => {
   return Date.now() - new Date(dateStr).getTime() < 7 * 86400000;
 };
 
+/* ── keyword highlighter ── */
+const highlight = (text, query) => {
+  if (!text) return text;
+  if (!query || !query.trim()) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = String(text).split(new RegExp(`(${escaped})`, "gi"));
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark
+        key={i}
+        style={{
+          background: "linear-gradient(135deg, #f59e0b55, #fbbf2455)",
+          color: "inherit",
+          borderRadius: 3,
+          padding: "1px 3px",
+          fontWeight: 700,
+          boxShadow: "0 0 0 1.5px #f59e0b66",
+        }}
+      >
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+};
+
 /* ── skeleton ── */
 const JobSkeleton = () => (
   <Card sx={{ borderRadius: 3 }}>
@@ -94,6 +121,7 @@ const Home = () => {
 
   const handleSearch = (e) => {
     const val = e.target.value.toLowerCase();
+    console.log("Search:", val, "Jobs:", jobs.length);
     setSearch(e.target.value);
     setActiveTag("");
     setFiltered(
@@ -506,15 +534,15 @@ const Home = () => {
             </Avatar>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.25, mb: 0.25, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                {job.title}
+                {highlight(job.title, search)}
               </Typography>
-              <Typography variant="body2" color="text.secondary" fontWeight={500} noWrap>{job.company}</Typography>
+              <Typography variant="body2" color="text.secondary" fontWeight={500} noWrap>{highlight(job.company, search)}</Typography>
             </Box>
           </Box>
 
           {/* Meta chips */}
           <Box sx={{ display: "flex", gap: 0.75, mb: 1.5, flexWrap: "wrap" }}>
-            <Chip icon={<LocationOnIcon sx={{ fontSize: 13 }} />} label={job.location} size="small" sx={{ fontSize: 12, height: 26 }} />
+            <Chip icon={<LocationOnIcon sx={{ fontSize: 13 }} />} label={highlight(job.location, search)} size="small" sx={{ fontSize: 12, height: 26 }} />
             {job.salary && job.salary !== "Not disclosed" ? (
               <Chip label={`💰 ${job.salary}`} size="small" sx={{ fontSize: 12, height: 26, fontWeight: 600, bgcolor: isDark ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.08)", color: isDark ? "#4ade80" : "#16a34a" }} />
             ) : (
@@ -530,7 +558,7 @@ const Home = () => {
 
           {/* Description */}
           <Typography color="text.secondary" fontSize={13} sx={{ lineHeight: 1.55, mb: "auto", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-            {job.description}
+            {highlight(job.description, search)}
           </Typography>
 
           {/* Footer */}
@@ -607,7 +635,13 @@ const Home = () => {
           placeholder="Search by title, company, or location..."
           value={search}
           onChange={handleSearch}
-          slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: "primary.main" }} /></InputAdornment> } }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: "primary.main" }} />
+              </InputAdornment>
+            ),
+          }}
           sx={{ maxWidth: 600, mx: "auto", display: "block", mb: 2 }}
         />
         <Box sx={{ display: "flex", gap: 0.75, justifyContent: "center", mb: 4, flexWrap: "wrap" }}>
