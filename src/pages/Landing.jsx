@@ -288,7 +288,7 @@ const Landing = () => {
 
         <Grid container spacing={2.5}>
           {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <Grid item xs={12} sm={6} md={4} key={title}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={title}>
               <Card
                 elevation={0}
                 sx={{
