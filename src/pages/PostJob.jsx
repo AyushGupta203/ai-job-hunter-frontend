@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import Navbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
 import {
   Box, Container, Typography, TextField,
   Button, Card, CardContent, Alert, CircularProgress,
@@ -16,10 +17,19 @@ const PostJob = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const { user, updateUser } = useAuth();
 
   const [formData, setFormData] = useState({
-    title: "", company: "", location: "", description: "", salary: "", experienceLevel: "", skills: ""
+    title: "", company: "", location: "", description: "", salary: "", experienceLevel: "", skills: "", companyWebsite: ""
   });
+
+  // Pre-fill company website if recruiter already has it in their profile
+  useEffect(() => {
+    if (user?.companyWebsite) {
+      setFormData(prev => ({ ...prev, companyWebsite: user.companyWebsite }));
+    }
+  }, [user]);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [extracting, setExtracting] = useState(false);
@@ -34,7 +44,8 @@ const PostJob = () => {
       setExtracting(true);
       try{
         const res = await API.post("/ai/extract-job", {rawText});
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           title :res.data.title,
           company : res.data.company,
           location : res.data.location,
@@ -42,8 +53,7 @@ const PostJob = () => {
           experienceLevel: res.data.experienceLevel || "",
           skills: res.data.skills || "",
           description: res.data.description,
-
-        });
+        }));
         setExtracting(false);
         setShowAI(false);
         setMessage({ text: "Job details extracted successfully!", type: "success" });
@@ -60,6 +70,13 @@ const PostJob = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // 1. Update the user profile with the new company website if provided
+      if (formData.companyWebsite && formData.companyWebsite !== user?.companyWebsite) {
+        await API.put("/users/profile", { companyWebsite: formData.companyWebsite });
+        updateUser({ companyWebsite: formData.companyWebsite });
+      }
+
+      // 2. Post the actual job
       await API.post("/jobs", formData);
       setMessage({ text: "Job posted successfully! 🎉 Redirecting...", type: "success" });
       setTimeout(() => navigate('/home'), 1500);
@@ -227,6 +244,20 @@ const PostJob = () => {
                     onChange={handleChange}
                     required 
                     placeholder="e.g. Tech Solutions Inc." 
+                    sx={inputStyles}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
+                    Company Website (Optional)
+                  </Typography>
+                  <TextField 
+                    fullWidth 
+                    name="companyWebsite"
+                    value={formData.companyWebsite} 
+                    onChange={handleChange}
+                    placeholder="e.g. https://www.techsolutions.com" 
                     sx={inputStyles}
                   />
                 </Grid>

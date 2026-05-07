@@ -8,9 +8,11 @@ import {
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useAuth } from "../context/AuthContext";
 
 const UploadResume = () => {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -25,9 +27,15 @@ const UploadResume = () => {
     formData.append("resume", file);
     setLoading(true);
     try {
-      await API.post("/resume/upload", formData, {
+      const res = await API.post("/resume/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      
+      // Update global context so the Navbar instantly shows ✅ Uploaded
+      if (res.data && res.data.resumeUrl) {
+        updateUser({ resumeUrl: res.data.resumeUrl });
+      }
+
       setMessage({ text: "Resume uploaded successfully! ✅", type: "success" });
     } catch (err) {
       setMessage({ text: err.response?.data?.msg || "Upload failed", type: "error" });

@@ -20,6 +20,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import PersonIcon from "@mui/icons-material/Person";
 
 // Hide navbar on scroll
 function HideOnScroll({ children }) {
@@ -38,8 +40,6 @@ const Navbar = () => {
   const { mode, toggleTheme } = useThemeToggle();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -63,25 +63,7 @@ const Navbar = () => {
     </Button>
   );
 
-  const handleUpload = async () => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("resume", file);
 
-    setUploading(true);
-    try {
-      await API.post("/resume/upload", formData);
-      setFile(null);
-      setAnchorEl(null); // close menu
-      alert("Resume uploaded successfully! ✅");
-    } catch (err) {
-      console.error("Upload error:", err);
-      const msg = err.response?.data?.error || err.response?.data?.msg || err.message || "Upload failed";
-      alert(`Upload failed: ${msg}`);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   return (
     <HideOnScroll>
@@ -142,6 +124,7 @@ const Navbar = () => {
             {user?.role === "seeker" && (
               <>
                 {navBtn("Explore", "/home", <ExploreIcon />)}
+                {navBtn("Analytics", "/analytics", <TimelineIcon />)}
                 {navBtn("Applications", "/tracker", <AssignmentIcon />)}
                 {navBtn("AI Hunter", "/ai-hunter", <AutoAwesomeIcon />)}
                 {navBtn("Resume Score", "/resume-score", <AssessmentIcon />)}
@@ -149,19 +132,23 @@ const Navbar = () => {
             )}
 
             {user?.role === "recruiter" && (
-              <Button
-                variant="contained"
-                startIcon={<WorkIcon />}
-                onClick={() => navigate("/post-job")}
-                sx={{
-                  bgcolor: "rgba(0,113,227,0.8)",
-                  backdropFilter: "blur(10px)",
-                  color: "#fff",
-                  "&:hover": { bgcolor: "rgba(0,113,227,1)" }
-                }}
-              >
-                Post Job
-              </Button>
+              <>
+                {navBtn("Dashboard", "/home", <ExploreIcon />)}
+                {navBtn("Analytics", "/analytics", <TimelineIcon />)}
+                <Button
+                  variant="contained"
+                  startIcon={<WorkIcon />}
+                  onClick={() => navigate("/post-job")}
+                  sx={{
+                    bgcolor: "rgba(0,113,227,0.8)",
+                    backdropFilter: "blur(10px)",
+                    color: "#fff",
+                    "&:hover": { bgcolor: "rgba(0,113,227,1)" }
+                  }}
+                >
+                  Post Job
+                </Button>
+              </>
             )}
           </Box>
 
@@ -217,26 +204,41 @@ const Navbar = () => {
 
           <Divider />
 
-          {/* Upload Resume */}
-          <MenuItem>
-            <Box>
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-              <Button
-                onClick={handleUpload}
-                disabled={!file || uploading}
-                startIcon={
-                  uploading
-                    ? <CircularProgress size={14} />
-                    : <UploadFileIcon />
-                }
-              >
-                Upload Resume
-              </Button>
-            </Box>
+          <MenuItem onClick={() => { setAnchorEl(null); navigate("/profile"); }}>
+            <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Edit Profile</ListItemText>
           </MenuItem>
+
+          <Divider />
+
+          {/* Resume Status */}
+          {user?.role === "seeker" && (
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 700, textTransform: 'uppercase', fontSize: 10 }}>
+                Resume Status
+              </Typography>
+              {user.resumeUrl ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="success.main" fontWeight={700}>
+                    ✅ Uploaded
+                  </Typography>
+                  <Button 
+                    size="small" 
+                    variant="outlined" 
+                    color="primary"
+                    sx={{ py: 0.25, px: 1, fontSize: 11, borderRadius: 1.5 }}
+                    onClick={() => window.open(user.resumeUrl, "_blank")}
+                  >
+                    View
+                  </Button>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="error.main" fontWeight={700}>
+                  ❌ Not Uploaded
+                </Typography>
+              )}
+            </Box>
+          )}
 
           <Divider />
 

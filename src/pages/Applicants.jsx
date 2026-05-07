@@ -16,6 +16,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LanguageIcon from "@mui/icons-material/Language";
+import CodeIcon from "@mui/icons-material/Code";
 
 const Applicants = () => {
   const { jobId } = useParams();
@@ -509,6 +513,32 @@ const Applicants = () => {
                 <Typography variant="body2" color="text.secondary" mb={2}>
                   Applied: {new Date(selectedProfile.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                 </Typography>
+
+                {/* Social Links in Dialog */}
+                {selectedProfile.userId?.socialLinks && (Object.values(selectedProfile.userId.socialLinks).some(link => link)) && (
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    {selectedProfile.userId.socialLinks.linkedin && (
+                      <Button size="small" variant="outlined" startIcon={<LinkedInIcon />} href={selectedProfile.userId.socialLinks.linkedin} target="_blank" sx={{ color: "#0077b5", borderColor: "rgba(0,119,181,0.3)", borderRadius: 980, textTransform: "none" }}>
+                        LinkedIn
+                      </Button>
+                    )}
+                    {selectedProfile.userId.socialLinks.github && (
+                      <Button size="small" variant="outlined" startIcon={<GitHubIcon />} href={selectedProfile.userId.socialLinks.github} target="_blank" sx={{ color: "#333", borderColor: "rgba(0,0,0,0.2)", borderRadius: 980, textTransform: "none" }}>
+                        GitHub
+                      </Button>
+                    )}
+                    {selectedProfile.userId.socialLinks.portfolio && (
+                      <Button size="small" variant="outlined" startIcon={<LanguageIcon />} href={selectedProfile.userId.socialLinks.portfolio} target="_blank" sx={{ borderRadius: 980, textTransform: "none" }}>
+                        Portfolio
+                      </Button>
+                    )}
+                    {selectedProfile.userId.socialLinks.leetcode && (
+                      <Button size="small" variant="outlined" startIcon={<CodeIcon />} href={selectedProfile.userId.socialLinks.leetcode} target="_blank" sx={{ color: "#f89f1b", borderColor: "rgba(248,159,27,0.3)", borderRadius: 980, textTransform: "none" }}>
+                        LeetCode
+                      </Button>
+                    )}
+                  </Box>
+                )}
 
                 <Divider sx={{ mb: 2 }} />
 

@@ -13,6 +13,8 @@ import Suggestions from "./pages/Suggestions";
 import ResumeReview from "./pages/ResumeReview";
 import Applicants from "./pages/Applicants";
 import VerifyEmail from "./pages/VerifyEmail";
+import Analytics from "./pages/Analytics";
+import Profile from "./pages/Profile";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { token, user } = useAuth();
@@ -53,6 +55,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <JobDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

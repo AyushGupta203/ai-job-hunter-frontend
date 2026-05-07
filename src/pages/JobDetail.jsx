@@ -13,6 +13,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import SendIcon from "@mui/icons-material/Send";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import WorkIcon from "@mui/icons-material/Work";
+import LanguageIcon from "@mui/icons-material/Language";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -134,6 +135,20 @@ const JobDetail = () => {
                 />
               )}
             </Box>
+
+            {job.postedBy?.companyWebsite && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<LanguageIcon />}
+                href={job.postedBy.companyWebsite.startsWith('http') ? job.postedBy.companyWebsite : `https://${job.postedBy.companyWebsite}`}
+                target="_blank"
+                rel="noreferrer"
+                sx={{ mb: 3, borderRadius: 980, textTransform: "none", color: "primary.main" }}
+              >
+                Visit Company Website
+              </Button>
+            )}
 
             {job.skills && job.skills.trim() !== "" && (
               <Box sx={{ mb: 3 }}>

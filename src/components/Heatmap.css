@@ -1,0 +1,36 @@
+.heatmap-container .react-calendar-heatmap rect {
+  rx: 3px;
+  ry: 3px;
+  transition: all 0.2s ease;
+}
+
+.heatmap-container .react-calendar-heatmap rect:hover {
+  stroke: #2563eb;
+  stroke-width: 1px;
+}
+
+/* Light Mode (default) */
+.heatmap-container .color-empty { fill: rgba(0, 113, 227, 0.05); }
+.heatmap-container .color-theme-1 { fill: rgba(0, 113, 227, 0.3); }
+.heatmap-container .color-theme-2 { fill: rgba(0, 113, 227, 0.6); }
+.heatmap-container .color-theme-3 { fill: rgba(0, 113, 227, 0.85); }
+.heatmap-container .color-theme-4 { fill: #0071e3; }
+
+/* Dark Mode */
+.heatmap-container.dark-mode .color-empty { fill: rgba(255, 255, 255, 0.05); }
+.heatmap-container.dark-mode .color-theme-1 { fill: rgba(96, 165, 250, 0.3); }
+.heatmap-container.dark-mode .color-theme-2 { fill: rgba(96, 165, 250, 0.6); }
+.heatmap-container.dark-mode .color-theme-3 { fill: rgba(96, 165, 250, 0.85); }
+.heatmap-container.dark-mode .color-theme-4 { fill: #60a5fa; }
+
+/* Text styling for months and days */
+.heatmap-container .react-calendar-heatmap text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 8px;
+  fill: rgba(0, 0, 0, 0.5);
+}
+
+.heatmap-container.dark-mode .react-calendar-heatmap text {
+  fill: rgba(255, 255, 255, 0.4);
+}
