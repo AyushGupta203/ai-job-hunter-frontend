@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box, Button, Container, Typography,
-  Grid, Card, CardContent, AppBar, Toolbar,
+  Card, CardContent, AppBar, Toolbar, Grid
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
@@ -15,7 +15,6 @@ import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-/* ── Typing cursor hook ─── */
 const useTyping = (words, speed = 80, pause = 2000) => {
   const [display, setDisplay] = useState("");
   const [wi, setWi] = useState(0);
@@ -288,7 +287,7 @@ const Landing = () => {
 
         <Grid container spacing={2.5}>
           {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={title}>
+            <Grid item xs={12} sm={6} md={4} key={title}>
               <Card
                 elevation={0}
                 sx={{

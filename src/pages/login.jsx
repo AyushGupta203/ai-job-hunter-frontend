@@ -53,25 +53,25 @@ const Login = () => {
     >
       <Container maxWidth="xs">
         <Paper elevation={12} sx={{ p: 4, borderRadius: 4 }}>
-        <Box sx={{ textAlign: "center", mb: 2.5 }}>
-        <Box
-          component="img"
-          src="/icons/MainLogo.png"
-          alt="AI Job Hunter Logo"
-          sx={{
-            width: 70,
-            height: 70, // ✅ equal dimensions
-            objectFit: "contain",
-            display: "block",
-            mx: "auto", // ✅ force center
-            mb: 1.2,
-            filter: "drop-shadow(0 0 12px rgba(108,99,255,0.6))",
-          }}
-        />
-        <Typography variant="h5" fontWeight="bold">
-          AI Job Hunter
-        </Typography>
-      </Box>
+          <Box sx={{ textAlign: "center", mb: 2.5 }}>
+            <Box
+              component="img"
+              src="/icons/MainLogo.png"
+              alt="AI Job Hunter Logo"
+              sx={{
+                width: 70,
+                height: 70,
+                objectFit: "contain",
+                display: "block",
+                mx: "auto",
+                mb: 1.2,
+                filter: "drop-shadow(0 0 12px rgba(108,99,255,0.6))",
+              }}
+            />
+            <Typography variant="h5" fontWeight="bold">
+              AI Job Hunter
+            </Typography>
+          </Box>
 
           <Typography sx={{ textAlign: "center", color: "text.secondary", mb: 3 }}>
             Welcome back — sign in to continue
@@ -114,7 +114,6 @@ const Login = () => {
               variant="contained"
               size="large"
               disabled={loading}
-              onClick={() => console.log("🔘 [Login] Button Clicked!")}
               sx={{ py: 1.5, fontSize: 15 }}
             >
               {loading ? (
