@@ -22,7 +22,7 @@ const Heatmap = ()=>{
         const res = await API.get("/analytics/heatmap");
         setData(res.data);
       }
-      catch(err){
+      catch{
         console.log("Error fetching")
       }
     };

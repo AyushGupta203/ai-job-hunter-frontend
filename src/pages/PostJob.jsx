@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import Navbar from "../components/Navbar";
@@ -20,15 +20,16 @@ const PostJob = () => {
   const { user, updateUser } = useAuth();
 
   const [formData, setFormData] = useState({
-    title: "", company: "", location: "", description: "", salary: "", experienceLevel: "", skills: "", companyWebsite: ""
+    title: "", company: "", location: "", description: "", salary: "", experienceLevel: "", skills: "", companyWebsite: user?.companyWebsite || ""
   });
 
-  // Pre-fill company website if recruiter already has it in their profile
-  useEffect(() => {
+  const [prevUser, setPrevUser] = useState(user);
+  if (user !== prevUser) {
+    setPrevUser(user);
     if (user?.companyWebsite) {
       setFormData(prev => ({ ...prev, companyWebsite: user.companyWebsite }));
     }
-  }, [user]);
+  }
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -58,7 +59,7 @@ const PostJob = () => {
         setShowAI(false);
         setMessage({ text: "Job details extracted successfully!", type: "success" });
       }
-      catch(err){
+      catch{
         setMessage({ text: "Failed to extract job details.", type: "error" });
       }
       finally{
@@ -218,7 +219,7 @@ const PostJob = () => {
 
             <Box component="form" onSubmit={handleSubmit}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid xs={12}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Job Title *
                   </Typography>
@@ -233,7 +234,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid xs={12} sm={6}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Company Name *
                   </Typography>
@@ -248,7 +249,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid xs={12} sm={6}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Company Website (Optional)
                   </Typography>
@@ -262,7 +263,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid xs={12} sm={6}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Location *
                   </Typography>
@@ -277,7 +278,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Salary (Optional)
                   </Typography>
@@ -291,7 +292,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Experience Required
                   </Typography>
@@ -305,7 +306,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Key Skills
                   </Typography>
@@ -319,7 +320,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid xs={12}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: isDark ? "rgba(200,210,255,0.85)" : "text.secondary", mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 12 }}>
                     Job Description *
                   </Typography>
@@ -336,7 +337,7 @@ const PostJob = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sx={{ mt: 2 }}>
+                <Grid xs={12} sx={{ mt: 2 }}>
                   <Button 
                     type="submit" 
                     fullWidth 

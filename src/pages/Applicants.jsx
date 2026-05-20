@@ -38,7 +38,7 @@ const Applicants = () => {
       try {
         const res = await API.get(`/applications/job/${jobId}`);
         setApplicants(res.data);
-      } catch (err) {
+      } catch {
         setError("Could not load applicants");
       } finally {
         setLoading(false);

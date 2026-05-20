@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import Navbar from "../components/Navbar";
 import {
@@ -11,7 +10,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAuth } from "../context/AuthContext";
 
 const UploadResume = () => {
-  const navigate = useNavigate();
   const { updateUser } = useAuth();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);

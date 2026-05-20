@@ -1,20 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Suspense , lazy } from "react";
 
 import Landing from "./pages/Landing";
-import Login from "./pages/login";
+
 import Register from "./pages/Register";
-import Home from "./pages/Home";
-import JobDetail from "./pages/JobDetail";
-import Tracker from "./pages/Tracker";
-import PostJob from "./pages/PostJob";
-import UploadResume from "./pages/UploadResume";
-import Suggestions from "./pages/Suggestions";
-import ResumeReview from "./pages/ResumeReview";
-import Applicants from "./pages/Applicants";
+const Home = lazy(()=> import("./pages/Home"));
+const JobDetail = lazy(()=> import("./pages/JobDetail"));
+const Tracker = lazy(()=> import("./pages/Tracker"));
+const PostJob = lazy(()=> import("./pages/PostJob"));
+const UploadResume = lazy(() => import("./pages/UploadResume"));
+const Suggestions = lazy(() => import("./pages/Suggestions"));
+const ResumeReview = lazy(() => import("./pages/ResumeReview"));
+const Applicants = lazy(() => import("./pages/Applicants"));
+
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Profile = lazy(() => import("./pages/Profile"));
+import Login from "./pages/Login";
 import VerifyEmail from "./pages/VerifyEmail";
-import Analytics from "./pages/Analytics";
-import Profile from "./pages/Profile";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { token, user } = useAuth();
@@ -34,6 +37,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+       <Suspense fallback={<p>Loading...</p>}>
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
@@ -129,7 +133,9 @@ function App() {
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   );

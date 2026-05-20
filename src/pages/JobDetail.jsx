@@ -32,7 +32,7 @@ const JobDetail = () => {
       try {
         const res = await API.get(`/jobs/${id}`);
         setJob(res.data);
-      } catch (err) {
+      } catch {
         setError("Job not found or server error");
       } finally {
         setLoading(false);

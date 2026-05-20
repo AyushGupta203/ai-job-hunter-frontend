@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import API from "../api/axios";
 import { Box, Typography, Container, Paper, CircularProgress, Alert, Button } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -8,16 +9,31 @@ import ErrorIcon from "@mui/icons-material/Error";
 const VerifyEmail = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading"); // "loading", "success", "error"
-  const [message, setMessage] = useState("");
+  const { login, token: loggedInToken } = useAuth();
+  const [status, setStatus] = useState(token ? "loading" : "error"); // "loading", "success", "error"
+  const [message, setMessage] = useState(token ? "" : "Invalid token.");
+  const hasCalled = useRef(false);
 
   useEffect(() => {
+    if (loggedInToken) {
+      navigate("/home");
+      return;
+    }
+
     const verifyToken = async () => {
       try {
         const res = await API.get(`/auth/verify-email/${token}`);
         if (res.status === 200 && res.data) {
           setStatus("success");
-          setMessage(typeof res.data === "string" ? res.data : "Email verified successfully!");
+          setMessage(res.data.msg || "Email verified successfully!");
+          
+          if (res.data.token && res.data.user) {
+            login(res.data.token, res.data.user);
+          }
+          
+          setTimeout(() => {
+            navigate("/home");
+          }, 2000);
         } else {
           setStatus("error");
           setMessage("Failed to verify email.");
@@ -29,12 +45,12 @@ const VerifyEmail = () => {
     };
 
     if (token) {
-      verifyToken();
-    } else {
-      setStatus("error");
-      setMessage("Invalid token.");
+      if (!hasCalled.current) {
+        hasCalled.current = true;
+        verifyToken();
+      }
     }
-  }, [token]);
+  }, [token, loggedInToken, navigate, login]);
 
   return (
     <Box sx={{

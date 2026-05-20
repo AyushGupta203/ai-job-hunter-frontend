@@ -193,11 +193,14 @@ const Home = () => {
 
   useEffect(() => {
     if (user?.role === "seeker") {
-      setTopPicksLoading(true);
-      API.get("/ai/recommend")
-        .then((res) => setTopPicks((res.data || []).slice(0, 3)))
-        .catch(() => setTopPicksError(true))
-        .finally(() => setTopPicksLoading(false));
+      const timer = setTimeout(() => {
+        setTopPicksLoading(true);
+        API.get("/ai/recommend")
+          .then((res) => setTopPicks((res.data || []).slice(0, 3)))
+          .catch(() => setTopPicksError(true))
+          .finally(() => setTopPicksLoading(false));
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [user]);
 
@@ -215,11 +218,11 @@ const Home = () => {
               </Typography>
               <Box sx={{ display: "flex", gap: 2, mt: 3, flexWrap: "wrap" }}>
                 <Box sx={{ bgcolor: isDark ? "rgba(255,255,255,0.07)" : "#fff", p: 2.5, borderRadius: 3, boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : "0 4px 20px rgba(0,0,0,0.04)", border: isDark ? "1px solid rgba(255,255,255,0.1)" : "none", minWidth: 140 }}>
-                  <Typography color="text.secondary" fontSize={13} fontWeight={600} textTransform="uppercase" mb={0.5}>Total Jobs</Typography>
+                  <Typography color="text.secondary" fontSize={13} fontWeight={600} sx={{ textTransform: "uppercase" }} mb={0.5}>Total Jobs</Typography>
                   <Typography variant="h4" fontWeight={800} color="#0071e3">{jobs.length}</Typography>
                 </Box>
                 <Box sx={{ bgcolor: isDark ? "rgba(255,255,255,0.07)" : "#fff", p: 2.5, borderRadius: 3, boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : "0 4px 20px rgba(0,0,0,0.04)", border: isDark ? "1px solid rgba(255,255,255,0.1)" : "none", minWidth: 140 }}>
-                  <Typography color="text.secondary" fontSize={13} fontWeight={600} textTransform="uppercase" mb={0.5}>Active Now</Typography>
+                  <Typography color="text.secondary" fontSize={13} fontWeight={600} sx={{ textTransform: "uppercase" }} mb={0.5}>Active Now</Typography>
                   <Typography variant="h4" fontWeight={800} color="#34c759">{jobs.filter((j) => j.status === "open").length}</Typography>
                 </Box>
               </Box>
@@ -247,7 +250,7 @@ const Home = () => {
               <Card key={job._id} sx={{ mb: 2.5, borderRadius: 3, transition: "all 0.25s", "&:hover": { boxShadow: isDark ? "0 12px 32px rgba(0,0,0,0.4)" : "0 12px 32px rgba(0,0,0,0.08)", transform: "translateY(-2px)" } }}>
                 <CardContent sx={{ p: 3 }}>
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={8}>
+                    <Grid xs={12} md={8}>
                       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
                         <Avatar variant="rounded" sx={{ width: 52, height: 52, bgcolor: "rgba(0,113,227,0.08)", color: "primary.main", fontWeight: 700, borderRadius: 2.5 }}>
                           {job.company?.[0]?.toUpperCase() || "C"}
@@ -268,7 +271,7 @@ const Home = () => {
                         </Box>
                       </Box>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid xs={12} md={4}>
                       <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
 
                         {/* ── PRIMARY: View Applicants ── */}
@@ -510,7 +513,7 @@ const Home = () => {
 
   /* ── JOB CARD ── */
   const renderJobCard = (job) => (
-    <Grid item xs={12} sm={6} md={4} key={job._id}>
+    <Grid xs={12} sm={6} md={4} key={job._id}>
       <Card
         onClick={() => navigate(`/jobs/${job._id}`)}
         sx={{
@@ -691,7 +694,7 @@ const Home = () => {
             ) : (
               <Grid container spacing={2}>
                 {topPicks.map((item, i) => (
-                  <Grid item xs={12} sm={4} key={i}>
+                  <Grid xs={12} sm={4} key={i}>
                     <Card
                       onClick={() => navigate(`/jobs/${item.jobId}`)}
                       sx={{
@@ -750,7 +753,7 @@ const Home = () => {
         {loading ? (
           <Grid container spacing={2} sx={{ pb: 6 }}>
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Grid item xs={12} sm={6} md={4} key={i}><JobSkeleton /></Grid>
+              <Grid xs={12} sm={6} md={4} key={i}><JobSkeleton /></Grid>
             ))}
           </Grid>
         ) : filtered.length === 0 ? (

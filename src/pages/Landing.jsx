@@ -286,40 +286,43 @@ const Landing = () => {
         </Typography>
 
         <Grid container spacing={2.5}>
-          {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <Grid item xs={12} sm={6} md={4} key={title}>
-              <Card
-                elevation={0}
-                sx={{
-                  ...cardBase,
-                  textAlign: "left", height: "100%",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    borderColor: isDark ? "rgba(96,165,250,0.25)" : "rgba(0,113,227,0.2)",
-                    boxShadow: isDark ? "0 20px 50px rgba(0,0,0,0.5)" : "0 20px 50px rgba(0,113,227,0.08)",
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3.5 }}>
-                  <Box
-                    sx={{
-                      width: 48, height: 48, borderRadius: "12px", mb: 2.5,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: isDark ? "rgba(96,165,250,0.1)" : "rgba(0,113,227,0.07)",
-                    }}
-                  >
-                    <Icon sx={{ fontSize: 24, color: primary }} />
-                  </Box>
-                  <Typography variant="h6" fontWeight={700} mb={1} color="text.primary">
-                    {title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.75 }}>
-                    {desc}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {FEATURES.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Grid xs={12} sm={6} md={4} key={item.title}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    ...cardBase,
+                    textAlign: "left", height: "100%",
+                    "&:hover": {
+                      transform: "translateY(-6px)",
+                      borderColor: isDark ? "rgba(96,165,250,0.25)" : "rgba(0,113,227,0.2)",
+                      boxShadow: isDark ? "0 20px 50px rgba(0,0,0,0.5)" : "0 20px 50px rgba(0,113,227,0.08)",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3.5 }}>
+                    <Box
+                      sx={{
+                        width: 48, height: 48, borderRadius: "12px", mb: 2.5,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: isDark ? "rgba(96,165,250,0.1)" : "rgba(0,113,227,0.07)",
+                      }}
+                    >
+                      <IconComponent sx={{ fontSize: 24, color: primary }} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} mb={1} color="text.primary">
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.75 }}>
+                      {item.desc}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
 
         {/* Bottom CTA */}

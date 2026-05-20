@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import API from "../api/axios";
 import {
   Box, Button, TextField, Typography, Container,
@@ -12,7 +11,6 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "seeker" });
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -28,7 +26,7 @@ const Register = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await API.post("/auth/register", formData);
+      await API.post("/auth/register", formData);
       setSuccessMsg(`Signup successful! A verification link has been sent to ${formData.email}. Please check your inbox (and spam folder).`);
     } catch (err) {
       setError(err.response?.data?.msg || "Registration failed");

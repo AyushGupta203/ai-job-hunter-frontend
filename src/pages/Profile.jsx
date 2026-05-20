@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
   Box, Container, Typography, TextField, Button, Card, 
   CardContent, Grid, InputAdornment, Alert, CircularProgress 
@@ -22,25 +22,24 @@ const Profile = () => {
   const [message, setMessage] = useState({ text: "", type: "" });
   
   const [form, setForm] = useState({
-    linkedin: "",
-    github: "",
-    portfolio: "",
-    leetcode: "",
-    companyWebsite: "",
+    linkedin: user?.socialLinks?.linkedin || "",
+    github: user?.socialLinks?.github || "",
+    portfolio: user?.socialLinks?.portfolio || "",
+    leetcode: user?.socialLinks?.leetcode || "",
+    companyWebsite: user?.companyWebsite || "",
   });
 
-  // Pre-fill existing data when the component loads
-  useEffect(() => {
-    if (user) {
-      setForm({
-        linkedin: user.socialLinks?.linkedin || "",
-        github: user.socialLinks?.github || "",
-        portfolio: user.socialLinks?.portfolio || "",
-        leetcode: user.socialLinks?.leetcode || "",
-        companyWebsite: user.companyWebsite || "",
-      });
-    }
-  }, [user]);
+  const [prevUser, setPrevUser] = useState(user);
+  if (user !== prevUser) {
+    setPrevUser(user);
+    setForm({
+      linkedin: user?.socialLinks?.linkedin || "",
+      github: user?.socialLinks?.github || "",
+      portfolio: user?.socialLinks?.portfolio || "",
+      leetcode: user?.socialLinks?.leetcode || "",
+      companyWebsite: user?.companyWebsite || "",
+    });
+  }
 
   const handleChange = (e) => {
     setForm({
@@ -112,7 +111,7 @@ const Profile = () => {
             )}
 
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="LinkedIn URL"
@@ -129,7 +128,7 @@ const Profile = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="GitHub URL"
@@ -146,7 +145,7 @@ const Profile = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Portfolio URL"
@@ -163,7 +162,7 @@ const Profile = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="LeetCode URL"
@@ -181,7 +180,7 @@ const Profile = () => {
               </Grid>
 
               {user?.role === "recruiter" && (
-                <Grid item xs={12}>
+                <Grid xs={12}>
                   <TextField
                     fullWidth
                     label="Company Website"
@@ -199,7 +198,7 @@ const Profile = () => {
                 </Grid>
               )}
 
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <Button
                   variant="contained"
                   size="large"

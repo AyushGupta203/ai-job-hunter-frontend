@@ -17,7 +17,7 @@ const Jobs = () => {
       try {
         const res = await API.get("/jobs");
         setJobs(res.data);
-      } catch (err) {
+      } catch {
         setError("Could not load jobs");
       } finally {
         setLoading(false);

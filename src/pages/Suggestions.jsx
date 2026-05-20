@@ -58,10 +58,13 @@ const Suggestions = () => {
   }, []);
 
   useEffect(() => {
-    fetchSuggestions(false);
+    const timer = setTimeout(() => {
+      fetchSuggestions(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchSuggestions]);
   /* Filtering + sorting logic */
- 
+  
 const processedData = useMemo(() => {
   let result = [...suggestions];
 
@@ -84,12 +87,6 @@ const processedData = useMemo(() => {
     
 
   const scoreColor = (s) => (s >= 70 ? "success" : s >= 50 ? "warning" : "error");
-  const scoreBg = (s) =>
-    s >= 70
-      ? isDark ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.08)"
-      : s >= 50
-        ? isDark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.08)"
-        : isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)";
   const scoreTextColor = (s) =>
     s >= 70 ? (isDark ? "#4ade80" : "#16a34a") : s >= 50 ? (isDark ? "#fbbf24" : "#d97706") : (isDark ? "#f87171" : "#dc2626");
 
@@ -222,7 +219,7 @@ const processedData = useMemo(() => {
         )}
 
         {/* ─── CARDS ─── */}
-        {processedData.map((item, i) => (
+        {processedData.map((item) => (
           <Card
             key={item.jobId}
             onClick={() => navigate(`/jobs/${item.jobId}`)}
