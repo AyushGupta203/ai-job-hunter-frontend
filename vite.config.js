@@ -14,4 +14,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    force: true,
+  },
+  build: {
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
+  },
 });
