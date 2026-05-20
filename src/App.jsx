@@ -16,7 +16,7 @@ const Applicants = lazy(() => import("./pages/Applicants"));
 
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Profile = lazy(() => import("./pages/Profile"));
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import VerifyEmail from "./pages/VerifyEmail";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
