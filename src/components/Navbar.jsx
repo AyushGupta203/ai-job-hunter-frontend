@@ -97,7 +97,7 @@ const Navbar = () => {
           >
             <Box
               component="img"
-              src="/icons/MainLogo.png"
+              src="/icons/MainLogo.jpg"
               alt="logo"
               sx={{ width: 36, height: 36, filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))" }}
             />

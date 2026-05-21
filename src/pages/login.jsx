@@ -56,7 +56,7 @@ const Login = () => {
           <Box sx={{ textAlign: "center", mb: 2.5 }}>
             <Box
               component="img"
-              src="/icons/MainLogo.png"
+              src="/icons/MainLogo.jpg"
               alt="AI Job Hunter Logo"
               sx={{
                 width: 70,

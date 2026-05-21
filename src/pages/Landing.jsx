@@ -107,7 +107,7 @@ const Landing = () => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
             <Box
               component="img"
-              src="/icons/MainLogo.png"
+              src="/icons/MainLogo.jpg"
               alt="AI Job Hunter Logo"
               onError={(e) => { e.target.style.display = "none"; }}
               sx={{ width: 36, height: 36, objectFit: "contain" }}
