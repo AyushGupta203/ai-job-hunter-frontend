@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import {
   Box, Button, TextField, Typography, Container,
   Paper, Alert, CircularProgress, Link,
@@ -11,6 +12,7 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "seeker" });
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -26,8 +28,16 @@ const Register = () => {
     setLoading(true);
     setError("");
     try {
-      await API.post("/auth/register", formData);
-      setSuccessMsg("Signup successful! You can now log in.");
+      const res = await API.post("/auth/register", formData);
+      if (res.data && res.data.token && res.data.user) {
+        login(res.data.token, res.data.user);
+        setSuccessMsg("Signup successful! Redirecting to home...");
+        setTimeout(() => {
+          navigate("/home");
+        }, 1500);
+      } else {
+        setSuccessMsg("Signup successful! You can now log in.");
+      }
     } catch (err) {
       setError(err.response?.data?.msg || "Registration failed");
     } finally {
