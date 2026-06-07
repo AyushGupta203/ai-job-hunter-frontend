@@ -27,7 +27,7 @@ const Register = () => {
     setError("");
     try {
       await API.post("/auth/register", formData);
-      setSuccessMsg(`Signup successful! A verification link has been sent to ${formData.email}. Please check your inbox (and spam folder).`);
+      setSuccessMsg("Signup successful! You can now log in.");
     } catch (err) {
       setError(err.response?.data?.msg || "Registration failed");
     } finally {

@@ -17,7 +17,6 @@ const Applicants = lazy(() => import("./pages/Applicants"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Profile = lazy(() => import("./pages/Profile"));
 import Login from "./pages/login";
-import VerifyEmail from "./pages/VerifyEmail";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { token, user } = useAuth();
@@ -43,7 +42,6 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
           {/* Protected routes for both roles */}
           <Route
